@@ -215,7 +215,7 @@ def parse_difficulty(dec: bytes, start: int = DIFFICULTY_BLOCK_START) -> Difficu
     """
     Parse the DifficultySettings block starting at `start`.
 
-    All difficulty fields (0x06–0x25) are encoded as uint16 (type byte 0x02).
+    All difficulty fields (0x06-0x25) are encoded as uint16 (type byte 0x02).
     The block may contain compact-inline entries (second byte != 0x80) which are
     skipped. Parsing stops as soon as a known difficulty field_id appears with a
     type other than u16 — that signals the session-object fields have begun
