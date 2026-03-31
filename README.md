@@ -1,3 +1,84 @@
 # Anno2205-Savegame-Modifier
 
-Python script to modify your Anno 2205 savegames, especially difficulty settings!
+Python script to view and modify your Anno 2205 savegames, including difficulty settings!
+
+## Usage
+
+First, clone this repository.
+
+Then, locate your savefile:
+- Windows (Ubisoft Connect): `C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\8a362a1f-2f5b-4d43-aa8c-4a918a88771b\1253\`
+- Lutris (Anno started through Ubisoft Connect): `~/Games/ubisoft-connect/drive_c/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/savegames/8a362a1f-2f5b-4d43-aa8c-4a918a88771b/1253/`
+- Wine: `${WINEPREFIX}/drive_c/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/savegames/8a362a1f-2f5b-4d43-aa8c-4a918a88771b/1253/`
+
+_The last two parts of the path (`8a362a1f-2f5b-4d43-aa8c-4a918a88771b/1253/`) may be different on your computer._
+
+You do not need the file `1.save`. It only contains savefile metadata.
+
+If you do not know which file is which savegame, use the `dump` command on them, which shows the name of your company.
+
+**Please keep in mind that modifying you savefile might break it. It is a good idea to create a backup NOW!**
+
+---
+
+Command synopsis: `python3 anno2205_save.py <savegame-file> <command> [<flags>]`
+
+### Inspecting the savefile
+
+```bash
+python3 anno2205_save.py <savefile> dump       # human-readable output
+python3 anno2205_save.py <savefile> dump --csv # CSV output (section,field,value)
+```
+
+### Changing a difficulty settings in the savefile
+
+```bash
+python3 anno2205_save.py <savefile> set <field> <value>   # patch a difficulty field
+
+# e.g. disable enemy invasions
+python3 anno2205_save.py ./1774952996.save set DifficultyMilitaryInvasions 0
+```
+
+These settings can be modified:
+
+| Setting name                                  | Description | Possible values  |
+|-----------------------------------------------|-------------|------------------|
+| `DifficultyConstructionCostRefund`            |             |                  |
+| `DifficultySatisfactionInfluencesTaxes`       |             |                  |
+| `DifficultyTemporarySectorEffects`            |             |                  |
+| `DifficultyConsumption`                       |             |                  |
+| `DifficultyDominanceAgriculture`              |             |                  |
+| `DifficultyOptionalQuestTimeout`              |             |                  |
+| `DifficultyNpcLevelSpeed`                     |             |                  |
+| `DifficultyRevenue`                           |             |                  |
+| `DifficultyWorkforce`                         |             |                  |
+| `DifficultyTraderRefillRate`                  |             |                  |
+| `DifficultyDistributionCenterOutput`          |             |                  |
+| `DifficultyMetropolisFactor`                  |             |                  |
+| `DifficultyMilitaryProgress`                  |             |                  |
+| `DifficultyPermanentSectorEffects`            |             |                  |
+| `DifficultyIncreasingDistributionCenterCosts` |             |                  |
+| `DifficultyMilitaryEnemyStrength`             |             |                  |
+| `DifficultyRelocateBuildings`                 |             |                  |
+| `DifficultyTradeRouteAdminCosts`              |             |                  |
+| `DifficultyOptionalQuestFrequency`            |             |                  |
+| `DifficultyDominanceHiTech`                   |             |                  |
+| `DifficultyDominanceHeavy`                    |             |                  |
+| `DifficultyDominanceEnergy`                   |             |                  |
+| `DifficultyDominanceBiotech`                  |             |                  |
+| `DifficultyDominanceShareBonus`               |             |                  |
+| `DifficultyInactiveCosts`                     |             |                  |
+| `DifficultyDestructibleShips`                 |             |                  |
+| `DifficultyMilitaryProgress2`                 |             |                  |
+| `DifficultyMilitaryInvasions`                 |             |                  |
+| `DifficultyMilitaryEnemyStrength2`            |             |                  |
+| `DifficultyStartCredits`                      |             |                  |
+| `DifficultyFacilityAuctions`                  |             |                  |
+| `DifficultyTraderPrices`                      |             |                  |
+
+The `set` command will create a backup of the file, named `<orig-filename>.bak`, first.
+
+
+## Documentation
+
+The results of reverse engineering the save file format are [documented in the wiki of this repository](https://code.leon.wtf/leon/Anno2205-Savegame-Modifier/wiki/File-Format-Specification).
