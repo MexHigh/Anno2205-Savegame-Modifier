@@ -327,11 +327,17 @@ def save_file(path: str, raw: bytes, dec: bytes, zlib_offset: int):
     Recompress and write modified save. Does NOT update the hash yet
     (hash algorithm unknown — the game may recalculate it on load).
     """
-    compressed = zlib.compress(dec, level=6)
-    # zlib.compress uses deflate with header; Anno uses 78 DA (default compression)
-    # Verify the magic matches
-    if compressed[:2] != b"\x78\x9c" and compressed[:2] != b"\x78\xda":
-        raise ValueError(f"Unexpected zlib magic after recompression: {compressed[:2].hex()}")
+    # Use raw deflate (wbits=-15) and build zlib stream manually
+    # Anno 2205 expects 78 DA (default compression, no dict)
+    compress_obj = zlib.compressobj(6, zlib.DEFLATED, -15)
+    raw_deflate = compress_obj.compress(dec)
+    raw_deflate += compress_obj.flush()
+    
+    # Build proper zlib stream: header + raw deflate + adler32 checksum
+    adler32 = zlib.adler32(dec) & 0xffffffff
+    adler_bytes = adler32.to_bytes(4, 'big')
+    
+    compressed = b'\x78\xda' + raw_deflate + adler_bytes
 
     new_raw = raw[:zlib_offset] + compressed
     with open(path, "wb") as f:
