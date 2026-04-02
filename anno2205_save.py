@@ -275,12 +275,16 @@ def load_save(path: str):
     if zlib_offset < 0:
         raise ValueError("No zlib stream found in save file")
 
+    d = zlib.decompressobj()
+    dec = d.decompress(raw[zlib_offset:])
+    trailing_data = d.unused_data
+
     dec = zlib.decompress(raw[zlib_offset:])
-    return raw, dec, zlib_offset
+    return raw, dec, zlib_offset, trailing_data
 
 
 # ---------------------------------------------------------------------------
-# Write back (skeleton for future 'set' command)
+# Write back
 # ---------------------------------------------------------------------------
 
 def _patch_difficulty(dec: bytes, settings: DifficultySettings, start: int = DIFFICULTY_BLOCK_START) -> bytes:
@@ -322,24 +326,37 @@ def _patch_difficulty(dec: bytes, settings: DifficultySettings, start: int = DIF
     return bytes(buf)
 
 
-def save_file(path: str, raw: bytes, dec: bytes, zlib_offset: int):
+def save_file(path: str, raw: bytes, dec: bytes, zlib_offset: int, trailing_data: bytes):
     """
     Recompress and write modified save. Does NOT update the hash yet
     (hash algorithm unknown — the game may recalculate it on load).
     """
-    # Use raw deflate (wbits=-15) and build zlib stream manually
-    # Anno 2205 expects 78 DA (default compression, no dict)
-    compress_obj = zlib.compressobj(6, zlib.DEFLATED, -15)
-    raw_deflate = compress_obj.compress(dec)
-    raw_deflate += compress_obj.flush()
-    
-    # Build proper zlib stream: header + raw deflate + adler32 checksum
-    adler32 = zlib.adler32(dec) & 0xffffffff
-    adler_bytes = adler32.to_bytes(4, 'big')
-    
-    compressed = b'\x78\xda' + raw_deflate + adler_bytes
+    compress_obj = zlib.compressobj(
+        level=9, 
+        method=zlib.DEFLATED, 
+        wbits=15, # full zlib stream
+        memLevel=8,
+        strategy=zlib.Z_DEFAULT_STRATEGY,
+    )
+    compressed = compress_obj.compress(dec)
+    compressed += compress_obj.flush()
 
-    new_raw = raw[:zlib_offset] + compressed
+    new_raw = raw[:zlib_offset] + compressed + trailing_data
+
+    print(f"orig total size    : {len(raw)}")
+    print(f"rebuilt total size : {len(new_raw)}")
+    print(f"zlib offset        : {zlib_offset:#x}")
+    print(f"trailing bytes     : {len(trailing_data)}")
+    print(f"orig zlib header   : {raw[zlib_offset:zlib_offset+2].hex()}")
+    print(f"new  zlib header   : {compressed[:2].hex()}")
+    print(f"identical          : {new_raw == raw}")
+
+    orig_stream = raw[zlib_offset:len(raw)-len(trailing_data)]
+    print(f"orig stream len     : {len(orig_stream)}")
+    print(f"new  stream len     : {len(compressed)}")
+    print(f"stream identical    : {orig_stream == compressed}")
+    print(f"tail identical      : {raw[len(raw)-len(trailing_data):] == trailing_data}")
+
     with open(path, "wb") as f:
         f.write(new_raw)
 
@@ -349,7 +366,7 @@ def save_file(path: str, raw: bytes, dec: bytes, zlib_offset: int):
 # ---------------------------------------------------------------------------
 
 def cmd_dump(path: str, as_csv: bool = False):
-    raw, dec, zlib_offset = load_save(path)
+    raw, dec, zlib_offset, trailing_data = load_save(path)
     meta = parse_metadata(raw, dec, zlib_offset)
     difficulty = parse_difficulty(dec, start=meta._difficulty_offset)
 
@@ -413,7 +430,7 @@ def _dump_csv(meta: SaveMetadata, difficulty: DifficultySettings):
 
 
 # ---------------------------------------------------------------------------
-# set command (skeleton)
+# set command
 # ---------------------------------------------------------------------------
 
 def cmd_set(path: str, field_name: str, value: int):
@@ -422,7 +439,7 @@ def cmd_set(path: str, field_name: str, value: int):
     Backs up the original file to <path>.bak first.
     """
     import shutil
-    raw, dec, zlib_offset = load_save(path)
+    raw, dec, zlib_offset, trailing_data = load_save(path)
     meta = parse_metadata(raw, dec, zlib_offset)
     difficulty = parse_difficulty(dec, start=meta._difficulty_offset)
 
@@ -442,10 +459,27 @@ def cmd_set(path: str, field_name: str, value: int):
     shutil.copy2(path, backup)
     print(f"Backed up original to: {backup}")
 
-    save_file(path, raw, new_dec, zlib_offset)
+    save_file(path, raw, new_dec, zlib_offset, trailing_data)
     print(f"Set {field_name}: {old_val} -> {value}")
     print(f"Saved: {path}")
 
+# ---------------------------------------------------------------------------
+# recommpress command
+# ---------------------------------------------------------------------------
+
+def cmd_recompress(path: str):
+    """
+    Uncompresses and recompresses the zlib stream without chaning any data.
+    """
+    import shutil
+    raw, dec, zlib_offset, trailing_data = load_save(path)
+
+    backup = path + ".bak"
+    shutil.copy2(path, backup)
+    print(f"Backed up original to: {backup}")
+
+    save_file(path, raw, dec, zlib_offset, trailing_data)
+    print(f"Saved: {path}")
 
 # ---------------------------------------------------------------------------
 # Entry point
@@ -476,6 +510,9 @@ def main():
             print(f"ERROR: value must be an integer, got '{args[3]}'")
             sys.exit(1)
         cmd_set(save_path, field_name, value)
+
+    elif command == "recompress":
+        cmd_recompress(save_path)
 
     else:
         print(f"Unknown command: {command}")
