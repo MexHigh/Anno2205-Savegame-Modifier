@@ -41,43 +41,51 @@ python3 anno2205_save.py ./1774952996.save set DifficultyMilitaryInvasions 0
 
 These settings can be modified:
 
-| Setting name                                  | Description | Possible values  |
-|-----------------------------------------------|-------------|------------------|
-| `DifficultyConstructionCostRefund`            |             |                  |
-| `DifficultySatisfactionInfluencesTaxes`       |             |                  |
-| `DifficultyTemporarySectorEffects`            |             |                  |
-| `DifficultyConsumption`                       |             |                  |
-| `DifficultyDominanceAgriculture`              |             |                  |
-| `DifficultyOptionalQuestTimeout`              |             |                  |
-| `DifficultyNpcLevelSpeed`                     |             |                  |
-| `DifficultyRevenue`                           |             |                  |
-| `DifficultyWorkforce`                         |             |                  |
-| `DifficultyTraderRefillRate`                  |             |                  |
-| `DifficultyDistributionCenterOutput`          |             |                  |
-| `DifficultyMetropolisFactor`                  |             |                  |
-| `DifficultyMilitaryProgress`                  |             |                  |
-| `DifficultyPermanentSectorEffects`            |             |                  |
-| `DifficultyIncreasingDistributionCenterCosts` |             |                  |
-| `DifficultyMilitaryEnemyStrength`             |             |                  |
-| `DifficultyRelocateBuildings`                 |             |                  |
-| `DifficultyTradeRouteAdminCosts`              |             |                  |
-| `DifficultyOptionalQuestFrequency`            |             |                  |
-| `DifficultyDominanceHiTech`                   |             |                  |
-| `DifficultyDominanceHeavy`                    |             |                  |
-| `DifficultyDominanceEnergy`                   |             |                  |
-| `DifficultyDominanceBiotech`                  |             |                  |
-| `DifficultyDominanceShareBonus`               |             |                  |
-| `DifficultyInactiveCosts`                     |             |                  |
-| `DifficultyDestructibleShips`                 |             |                  |
-| `DifficultyMilitaryProgress2`                 |             |                  |
-| `DifficultyMilitaryInvasions`                 |             |                  |
-| `DifficultyMilitaryEnemyStrength2`            |             |                  |
-| `DifficultyStartCredits`                      |             |                  |
-| `DifficultyFacilityAuctions`                  |             |                  |
-| `DifficultyTraderPrices`                      |             |                  |
+| Setting name                                  | Description                                       | Possible values                                   | Tested/Working                 | 
+|-----------------------------------------------|---------------------------------------------------|---------------------------------------------------|--------------------------------|
+| `DifficultyConstructionCostRefund`            |                                                   |                                                   | not tested                     |
+| `DifficultySatisfactionInfluencesTaxes`       | Satisfaction Impact                               | No Impact (0), Medium Impact (1), High Impact (2) | not tested                     |
+| `DifficultyTemporarySectorEffects`            |                                                   |                                                   | not tested                     |
+| `DifficultyConsumption`                       | Goods Consumption                                 | Sparse (0), Medium (1), Plenty (2)                | not tested                     |
+| `DifficultyDominanceAgriculture`              |                                                   |                                                   | not tested                     |
+| `DifficultyOptionalQuestTimeout`              |                                                   |                                                   | not tested                     |
+| `DifficultyNpcLevelSpeed`                     |                                                   |                                                   | not tested                     |
+| `DifficultyRevenue`                           |                                                   |                                                   | not tested                     |
+| `DifficultyWorkforce`                         | Provided Workforce                                | Plenty (0), Medium (1), Sparse (2)                | not tested                     |
+| `DifficultyTraderRefillRate`                  |                                                   |                                                   | not tested                     |
+| `DifficultyDistributionCenterOutput`          | Unknown (seems to always be set to `1`)           | unknown                                           | not tested                     |
+| `DifficultyMetropolisFactor`                  |                                                   |                                                   | not tested                     |
+| `DifficultyMilitaryProgress`                  |                                                   |                                                   | not tested                     |
+| `DifficultyPermanentSectorEffects`            |                                                   |                                                   | not tested                     |
+| `DifficultyIncreasingDistributionCenterCosts` |                                                   |                                                   | not tested                     |
+| `DifficultyMilitaryEnemyStrength`             |                                                   |                                                   | not tested                     |
+| `DifficultyRelocateBuildings`                 |                                                   |                                                   | not tested                     |
+| `DifficultyTradeRouteAdminCosts`              |                                                   |                                                   | not tested                     |
+| `DifficultyOptionalQuestFrequency`            |                                                   |                                                   | not tested                     |
+| `DifficultyDominanceHiTech`                   |                                                   |                                                   | not tested                     |
+| `DifficultyDominanceHeavy`                    |                                                   |                                                   | not tested                     |
+| `DifficultyDominanceEnergy`                   |                                                   |                                                   | not tested                     |
+| `DifficultyDominanceBiotech`                  |                                                   |                                                   | not tested                     |
+| `DifficultyDominanceShareBonus`               |                                                   |                                                   | not tested                     |
+| `DifficultyInactiveCosts`                     |                                                   |                                                   | not tested                     |
+| `DifficultyDestructibleShips`                 | Destroyed ships will get replaced with a unranked version | 0 (no), 1 (yes)                           | not tested                     |
+| `DifficultyMilitaryProgress2`                 |                                                   |                                                   | not tested                     |
+| `DifficultyMilitaryInvasions`                 | Enemy Invasions (Sector Invasion of Virgil Drake) | 0 (never), 1 (sparse)                             | tested, works                  |
+| `DifficultyMilitaryEnemyStrength2`            |                                                   |                                                   | not tested                     |
+| `DifficultyStartCredits`                      | Start Credits                                     | Plenty (0), Medium (1), Sparse (2)                | no effect when changed mid-game |
+| `DifficultyFacilityAuctions`                  |                                                   |                                                   | not tested                     |
+| `DifficultyTraderPrices`                      |                                                   |                                                   | not tested                     |
 
 The `set` command will create a backup of the file, named `<orig-filename>.bak`, first.
 
+**Please note, that not all properties have an effect when changed mid-game and will get overwritten!** Most of the settings are also untested, and I don't know which value matches which in-game string. So if you are interested in helping me finding all values, let me know!
+
+---
+
+After creating a modified savefile, reupload the file to Anno Savegame folder **and rename it, e.g. by incrementing the number by 1**.
+If you do not rename the file, it will get overwritten by the cloud backup save file when starting up Anno (Ubisoft Cloud syncs saves by file name).
+
+Have fun tinkering and playing :)
 
 ## Documentation
 
