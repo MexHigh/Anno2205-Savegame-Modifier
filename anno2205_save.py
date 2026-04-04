@@ -3,7 +3,8 @@
 Anno 2205 Save Game Tool
 Usage:
     anno2205_save.py <savefile> dump [--csv]
-    anno2205_save.py <savefile> set <field> <value>   (not yet implemented)
+    anno2205_save.py <savefile> set <field> <value>
+    anno2205_save.py <savefile> rename-corp <new_name>
 
 File format (reverse engineered):
     Bytes 0x000-0x007: Magic/version header (LE uint32 at 0 = 0x224 = 548)
@@ -287,6 +288,34 @@ def load_save(path: str):
 # Write back
 # ---------------------------------------------------------------------------
 
+def _patch_corporation_name(dec: bytes, new_name: str) -> bytes:
+    """
+    Write new corporation name into decompressed data.
+    Returns modified decompressed bytes.
+    Raises ValueError if new name is longer than the original.
+    """
+    CORP_NAME_OFF = 0x02b
+    if dec[CORP_NAME_OFF] != 0x03 or dec[CORP_NAME_OFF + 1] != 0x80:
+        raise ValueError("CorporationName field not found at expected offset")
+    
+    old_byte_len = dec[CORP_NAME_OFF + 2]
+    new_name_utf16 = new_name.encode("utf-16-le")
+    new_byte_len = len(new_name_utf16)
+    
+    if new_byte_len > old_byte_len:
+        raise ValueError(
+            f"New name too long: {new_byte_len} bytes (max {old_byte_len})."
+        )
+    
+    header_before = dec[:CORP_NAME_OFF + 2]
+    new_len_byte = bytes([new_byte_len])
+    header_after = dec[CORP_NAME_OFF + 3 + old_byte_len:]
+    
+    new_data = header_before + new_len_byte + new_name_utf16 + header_after
+    
+    return new_data
+
+
 def _patch_difficulty(dec: bytes, settings: DifficultySettings, start: int = DIFFICULTY_BLOCK_START) -> bytes:
     """
     Write updated DifficultySettings values back into decompressed data.
@@ -463,6 +492,31 @@ def cmd_set(path: str, field_name: str, value: int):
     print(f"Set {field_name}: {old_val} -> {value}")
     print(f"Saved: {path}")
 
+
+def cmd_rename(path: str, new_name: str):
+    """
+    Rename the corporation and write the save back.
+    Backs up the original file to <path>.bak first.
+    """
+    import shutil
+    raw, dec, zlib_offset, trailing_data = load_save(path)
+    meta = parse_metadata(raw, dec, zlib_offset)
+
+    old_name = meta.corporation_name
+    try:
+        new_dec = _patch_corporation_name(dec, new_name)
+    except ValueError as e:
+        print(f"ERROR: {e}")
+        sys.exit(1)
+
+    backup = path + ".bak"
+    shutil.copy2(path, backup)
+    print(f"Backed up original to: {backup}")
+
+    save_file(path, raw, new_dec, zlib_offset, trailing_data)
+    print(f"Renamed corporation: '{old_name}' -> '{new_name}'")
+    print(f"Saved: {path}")
+
 # ---------------------------------------------------------------------------
 # recommpress command
 # ---------------------------------------------------------------------------
@@ -511,12 +565,19 @@ def main():
             sys.exit(1)
         cmd_set(save_path, field_name, value)
 
+    elif command == "rename-corp":
+        if len(args) < 3:
+            print("Usage: anno2205_save.py <savefile> rename-corp <new_name>")
+            sys.exit(1)
+        new_name = args[2]
+        cmd_rename(save_path, new_name)
+
     elif command == "recompress":
         cmd_recompress(save_path)
 
     else:
         print(f"Unknown command: {command}")
-        print("Commands: dump [--csv]  |  set <field> <value>")
+        print("Commands: dump [--csv] | set <field> <value> | rename-corp <new_name>")
         sys.exit(1)
 
 
