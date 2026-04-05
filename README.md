@@ -6,7 +6,7 @@ Python script to view and modify your Anno 2205 savegames, including difficulty 
 
 First, clone this repository.
 
-Then, locate your savefile:
+Then, locate your savefile and **copy it to a save place**:
 - Windows (Ubisoft Connect): `C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames\8a362a1f-2f5b-4d43-aa8c-4a918a88771b\1253\`
 - Lutris (Anno started through Ubisoft Connect): `~/Games/ubisoft-connect/drive_c/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/savegames/8a362a1f-2f5b-4d43-aa8c-4a918a88771b/1253/`
 - Wine: `${WINEPREFIX}/drive_c/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/savegames/8a362a1f-2f5b-4d43-aa8c-4a918a88771b/1253/`
@@ -50,7 +50,7 @@ These settings can be modified:
 | `DifficultyDominanceAgriculture`              |                                                   |                                                   | not tested                     |
 | `DifficultyOptionalQuestTimeout`              |                                                   |                                                   | not tested                     |
 | `DifficultyNpcLevelSpeed`                     |                                                   |                                                   | not tested                     |
-| `DifficultyRevenue`                           |                                                   |                                                   | not tested                     |
+| `DifficultyRevenue`                           | Revenue of citizens                               | Plenty (0), Medium (1), Sparse (2)                | tested, works                  |
 | `DifficultyWorkforce`                         | Provided Workforce                                | Plenty (0), Medium (1), Sparse (2)                | not tested                     |
 | `DifficultyTraderRefillRate`                  |                                                   |                                                   | not tested                     |
 | `DifficultyDistributionCenterOutput`          | Unknown (seems to always be set to `1`)           | unknown                                           | not tested                     |
@@ -82,8 +82,8 @@ The `set` command will create a backup of the file, named `<orig-filename>.bak`,
 
 ---
 
-After creating a modified savefile, reupload the file to Anno Savegame folder **and rename it, e.g. by incrementing the number by 1**.
-If you do not rename the file, it will get overwritten by the cloud backup save file when starting up Anno (Ubisoft Cloud syncs saves by file name).
+After creating the modified savefile, **start Anno before copying the savefile back to the savefile folder! Otherwise, Cloud Sync will overwrite your changes**.
+Wait for the start of the intro video and THEN copy your modified savefile over, overwriting the original.
 
 Have fun tinkering and playing :)
 
